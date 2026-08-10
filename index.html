@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarCost</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🚗 CarCost</div>
+
+    <div class="header-buttons">
+        <button onclick="openReport()">🔍 تقرير السيارة</button>
+        <button onclick="openAddCar()">➕ إضافة سيارة</button>
+    </div>
+</header>
+
+<main>
+
+    <!-- الرئيسية -->
+    <section id="home">
+
+        <h1>🚗 CarCost</h1>
+
+        <p>احسب تكلفة سياراتك وأرباحها</p>
+
+        <div class="home-buttons">
+            <button class="main-button" onclick="openReport()">
+                🔍 تقرير السيارة
+            </button>
+
+            <button class="main-button" onclick="openAddCar()">
+                ➕ إضافة وحساب
+            </button>
+        </div>
+
+        <!-- الإحصائيات -->
+        <div class="stats">
+
+            <div class="stat">
+                <span>🚗 عدد السيارات</span>
+                <strong id="carCount">0</strong>
+            </div>
+
+            <div class="stat">
+                <span>💰 إجمالي التكلفة</span>
+                <strong id="allCost">0 ر.ع</strong>
+            </div>
+
+            <div class="stat">
+                <span>💵 إجمالي البيع</span>
+                <strong id="allSale">0 ر.ع</strong>
+            </div>
+
+            <div class="stat">
+                <span>📈 إجمالي الربح</span>
+                <strong id="allProfit">0 ر.ع</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- تقرير VIN -->
+    <section id="reportPage" class="hidden">
+
+        <button class="back" onclick="goHome()">← رجوع</button>
+
+        <div class="report-search">
+
+            <h1>🔍 تقرير السيارة</h1>
+
+            <p>أدخل رقم الشاصي VIN</p>
+
+            <input
+                id="vin"
+                maxlength="17"
+                placeholder="VIN - 17 characters"
+            >
+
+            <button onclick="searchVIN()">
+                🔎 فحص السيارة
+            </button>
+
+        </div>
+
+        <div id="loading" class="loading hidden">
+            🔄 جاري البحث عن السيارة...
+        </div>
+
+        <div id="report" class="hidden">
+
+            <div class="card">
+
+                <h2>🚗 معلومات السيارة</h2>
+
+                <div class="grid">
+
+                    <div>
+                        الشركة
+                        <strong id="make">-</strong>
+                    </div>
+
+                    <div>
+                        الموديل
+                        <strong id="model">-</strong>
+                    </div>
+
+                    <div>
+                        السنة
+                        <strong id="year">-</strong>
+                    </div>
+
+                    <div>
+                        VIN
+                        <strong id="vinResult">-</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>💥 سجل الحوادث والأضرار</h2>
+
+                <div id="accidents">
+                    لا توجد بيانات بعد.
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>📏 سجل الممشى</h2>
+
+                <div id="mileage">
+                    لا توجد بيانات بعد.
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>🏷️ حالة السيارة</h2>
+
+                <div id="titleStatus">
+                    غير متوفر
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>📸 صور المزاد</h2>
+
+                <div id="photos">
+                    لا توجد صور متاحة.
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>🇴🇲 السوق العُماني</h2>
+
+                <div class="oman-price">
+
+                    <span>سعر السوق المتوقع</span>
+
+                    <strong id="omanPrice">
+                        سيتم حسابه
+                    </strong>
+
+                    <span>سعر البيع المقترح</span>
+
+                    <strong id="sellingPrice">
+                        سيتم حسابه
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <div class="card profit">
+
+                <h2>💰 تحليل الصفقة</h2>
+
+                <div class="grid">
+
+                    <div>
+                        تكلفة السيارة
+                        <strong id="totalCost">-</strong>
+                    </div>
+
+                    <div>
+                        سعر البيع
+                        <strong id="expectedSale">-</strong>
+                    </div>
+
+                    <div>
+                        الربح المتوقع
+                        <strong id="profit">-</strong>
+                    </div>
+
+                </div>
+
+                <div id="dealScore" class="score">
+                    🧠 تقييم الصفقة: غير محسوب
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- إضافة وحساب -->
+    <section id="addCarPage" class="hidden">
+
+        <button class="back" onclick="goHome()">
+            ← رجوع
+        </button>
+
+        <div class="card">
+
+            <h1>🚗 إضافة سيارة وحساب</h1>
+
+            <div class="form-grid">
+
+                <div>
+                    <label>اسم السيارة</label>
+                    <input
+                        id="carName"
+                        placeholder="مثال: Toyota Camry"
+                    >
+                </div>
+
+                <div>
+                    <label>السنة</label>
+                    <input
+                        id="carYear"
+                        type="number"
+                        placeholder="2022"
+                    >
+                </div>
+
+                <div>
+                    <label>سعر الشراء</label>
+                    <input
+                        id="buyPrice"
+                        type="number"
+                        placeholder="2300"
+                    >
+                </div>
+
+                <div>
+                    <label>الشحن</label>
+                    <input
+                        id="shipping"
+                        type="number"
+                        placeholder="200"
+                    >
+                </div>
+
+                <div>
+                    <label>التصليح</label>
+                    <input
+                        id="repair"
+                        type="number"
+                        placeholder="100"
+                    >
+                </div>
+
+                <div>
+                    <label>مصاريف أخرى</label>
+                    <input
+                        id="otherCost"
+                        type="number"
+                        placeholder="120"
+                    >
+                </div>
+
+                <div>
+                    <label>سعر البيع المتوقع</label>
+                    <input
+                        id="salePrice"
+                        type="number"
+                        placeholder="5000"
+                    >
+                </div>
+
+            </div>
+
+            <button
+                class="calculate-button"
+                onclick="addAndCalculate()"
+            >
+                🚀 إضافة وحساب
+            </button>
+
+        </div>
+
+
+        <!-- السيارات -->
+        <div class="card">
+
+            <h2>🚗 سياراتي</h2>
+
+            <div id="carsList">
+                لا توجد سيارات مضافة.
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    CarCost © 2026
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
