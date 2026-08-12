@@ -1,333 +1,567 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarCost</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <title>نظام إدارة تكاليف وأرباح السيارات</title>
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --accent-blue: #2563EB;
+            --accent-blue-hover: #1D4ED8;
+            --accent-green: #10B981;
+            --accent-amber: #D97706;
+            --danger-red: #EF4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* KPI Stat Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .value-blue { color: var(--accent-blue); }
+        .value-amber { color: var(--accent-amber); }
+        .value-dark { color: var(--text-primary); }
+        .value-green { color: var(--accent-green); }
+
+        /* Form Card */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .form-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.span-2 {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 640px) {
+            .form-group.span-2 {
+                grid-column: span 1;
+            }
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+            background-color: #FFFFFF;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Live Summary Banner Inside Form */
+        .live-summary {
+            background-color: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .live-summary-info {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .summary-item span.title {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .summary-item span.amount {
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-blue-hover);
+        }
+
+        /* Table Card */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #F1F5F9;
+            color: var(--text-secondary);
+            font-weight: 700;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background-color: #F8FAFC;
+        }
+
+        .text-bold {
+            font-weight: 700;
+        }
+
+        .badge-profit {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .badge-loss {
+            color: var(--danger-red);
+            font-weight: 700;
+        }
+
+        .btn-delete {
+            background: #FEE2E2;
+            color: var(--danger-red);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #FCA5A5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+    </style>
+</head>
 <body>
 
-<header>
-    <div class="logo">🚗 CarCost</div>
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            <h1>🚗 لوحة إدارة تكاليف وأرباح السيارات</h1>
+            <p>حساب التكلفة الإجمالية والربح المتوقع بدقة وحفظ البيانات تلقائياً</p>
+        </div>
+    </header>
 
-    <div class="header-buttons">
-        <button onclick="openReport()">🔍 تقرير السيارة</button>
-        <button onclick="openAddCar()">➕ إضافة سيارة</button>
+    <!-- KPI Stats Bar -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">إجمالي السيارات المضافة</div>
+            <div class="value value-blue" id="kpi-count">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">إجمالي التكاليف</div>
+            <div class="value value-amber" id="kpi-total-cost">0.000 ر.ع</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">إجمالي المبيعات</div>
+            <div class="value value-dark" id="kpi-total-sales">0.000 ر.ع</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">صافي الأرباح المتوقعة</div>
+            <div class="value value-green" id="kpi-total-profit">0.000 ر.ع</div>
+        </div>
     </div>
-</header>
 
-<main>
-
-    <!-- الرئيسية -->
-    <section id="home">
-
-        <h1>🚗 CarCost</h1>
-
-        <p>احسب تكلفة سياراتك وأرباحها</p>
-
-        <div class="home-buttons">
-            <button class="main-button" onclick="openReport()">
-                🔍 تقرير السيارة
-            </button>
-
-            <button class="main-button" onclick="openAddCar()">
-                ➕ إضافة وحساب
-            </button>
-        </div>
-
-        <!-- الإحصائيات -->
-        <div class="stats">
-
-            <div class="stat">
-                <span>🚗 عدد السيارات</span>
-                <strong id="carCount">0</strong>
-            </div>
-
-            <div class="stat">
-                <span>💰 إجمالي التكلفة</span>
-                <strong id="allCost">0 ر.ع</strong>
-            </div>
-
-            <div class="stat">
-                <span>💵 إجمالي البيع</span>
-                <strong id="allSale">0 ر.ع</strong>
-            </div>
-
-            <div class="stat">
-                <span>📈 إجمالي الربح</span>
-                <strong id="allProfit">0 ر.ع</strong>
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- تقرير VIN -->
-    <section id="reportPage" class="hidden">
-
-        <button class="back" onclick="goHome()">← رجوع</button>
-
-        <div class="report-search">
-
-            <h1>🔍 تقرير السيارة</h1>
-
-            <p>أدخل رقم الشاصي VIN</p>
-
-            <input
-                id="vin"
-                maxlength="17"
-                placeholder="VIN - 17 characters"
-            >
-
-            <button onclick="searchVIN()">
-                🔎 فحص السيارة
-            </button>
-
-        </div>
-
-        <div id="loading" class="loading hidden">
-            🔄 جاري البحث عن السيارة...
-        </div>
-
-        <div id="report" class="hidden">
-
-            <div class="card">
-
-                <h2>🚗 معلومات السيارة</h2>
-
-                <div class="grid">
-
-                    <div>
-                        الشركة
-                        <strong id="make">-</strong>
-                    </div>
-
-                    <div>
-                        الموديل
-                        <strong id="model">-</strong>
-                    </div>
-
-                    <div>
-                        السنة
-                        <strong id="year">-</strong>
-                    </div>
-
-                    <div>
-                        VIN
-                        <strong id="vinResult">-</strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>💥 سجل الحوادث والأضرار</h2>
-
-                <div id="accidents">
-                    لا توجد بيانات بعد.
-                </div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>📏 سجل الممشى</h2>
-
-                <div id="mileage">
-                    لا توجد بيانات بعد.
-                </div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>🏷️ حالة السيارة</h2>
-
-                <div id="titleStatus">
-                    غير متوفر
-                </div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>📸 صور المزاد</h2>
-
-                <div id="photos">
-                    لا توجد صور متاحة.
-                </div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>🇴🇲 السوق العُماني</h2>
-
-                <div class="oman-price">
-
-                    <span>سعر السوق المتوقع</span>
-
-                    <strong id="omanPrice">
-                        سيتم حسابه
-                    </strong>
-
-                    <span>سعر البيع المقترح</span>
-
-                    <strong id="sellingPrice">
-                        سيتم حسابه
-                    </strong>
-
-                </div>
-
-            </div>
-
-            <div class="card profit">
-
-                <h2>💰 تحليل الصفقة</h2>
-
-                <div class="grid">
-
-                    <div>
-                        تكلفة السيارة
-                        <strong id="totalCost">-</strong>
-                    </div>
-
-                    <div>
-                        سعر البيع
-                        <strong id="expectedSale">-</strong>
-                    </div>
-
-                    <div>
-                        الربح المتوقع
-                        <strong id="profit">-</strong>
-                    </div>
-
-                </div>
-
-                <div id="dealScore" class="score">
-                    🧠 تقييم الصفقة: غير محسوب
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- إضافة وحساب -->
-    <section id="addCarPage" class="hidden">
-
-        <button class="back" onclick="goHome()">
-            ← رجوع
-        </button>
-
-        <div class="card">
-
-            <h1>🚗 إضافة سيارة وحساب</h1>
-
+    <!-- Form Section -->
+    <div class="form-card">
+        <h2>➕ إضافة سيارة وحساب التكلفة والربح</h2>
+        
+        <form id="carForm" onsubmit="saveCarData(event)">
             <div class="form-grid">
-
-                <div>
-                    <label>اسم السيارة</label>
-                    <input
-                        id="carName"
-                        placeholder="مثال: Toyota Camry"
-                    >
+                <div class="form-group span-2">
+                    <label for="carName">اسم السيارة والموديل</label>
+                    <input type="text" id="carName" placeholder="أدخل اسم السيارة" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="carYear">السنة</label>
+                    <input type="number" id="carYear" placeholder="السنة" min="1900" max="2030" required>
                 </div>
 
-                <div>
-                    <label>السنة</label>
-                    <input
-                        id="carYear"
-                        type="number"
-                        placeholder="2022"
-                    >
+                <div class="form-group">
+                    <label for="buyPrice">سعر الشراء (ر.ع)</label>
+                    <input type="number" id="buyPrice" placeholder="0" step="0.001" min="0" oninput="calculateLive()" required>
                 </div>
 
-                <div>
-                    <label>سعر الشراء</label>
-                    <input
-                        id="buyPrice"
-                        type="number"
-                        placeholder="2300"
-                    >
+                <div class="form-group">
+                    <label for="shippingPrice">تكلفة الشحن (ر.ع)</label>
+                    <input type="number" id="shippingPrice" placeholder="0" step="0.001" min="0" oninput="calculateLive()">
                 </div>
 
-                <div>
-                    <label>الشحن</label>
-                    <input
-                        id="shipping"
-                        type="number"
-                        placeholder="200"
-                    >
+                <div class="form-group">
+                    <label for="repairPrice">التصليح والصيانة (ر.ع)</label>
+                    <input type="number" id="repairPrice" placeholder="0" step="0.001" min="0" oninput="calculateLive()">
                 </div>
 
-                <div>
-                    <label>التصليح</label>
-                    <input
-                        id="repair"
-                        type="number"
-                        placeholder="100"
-                    >
+                <div class="form-group">
+                    <label for="otherExpenses">مصاريف أخرى (ر.ع)</label>
+                    <input type="number" id="otherExpenses" placeholder="0" step="0.001" min="0" oninput="calculateLive()">
                 </div>
 
-                <div>
-                    <label>مصاريف أخرى</label>
-                    <input
-                        id="otherCost"
-                        type="number"
-                        placeholder="120"
-                    >
+                <div class="form-group span-2">
+                    <label for="sellPrice">سعر البيع المتوقع / الفعلي (ر.ع)</label>
+                    <input type="number" id="sellPrice" placeholder="0" step="0.001" min="0" oninput="calculateLive()" required>
                 </div>
-
-                <div>
-                    <label>سعر البيع المتوقع</label>
-                    <input
-                        id="salePrice"
-                        type="number"
-                        placeholder="5000"
-                    >
-                </div>
-
             </div>
 
-            <button
-                class="calculate-button"
-                onclick="addAndCalculate()"
-            >
-                🚀 إضافة وحساب
-            </button>
-
-        </div>
-
-
-        <!-- السيارات -->
-        <div class="card">
-
-            <h2>🚗 سياراتي</h2>
-
-            <div id="carsList">
-                لا توجد سيارات مضافة.
+            <!-- Live Calculation Summary Box -->
+            <div class="live-summary">
+                <div class="live-summary-info">
+                    <div class="summary-item">
+                        <span class="title">التكلفة الإجمالية:</span>
+                        <span class="amount value-amber" id="liveTotalCost">0.000 ر.ع</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="title">الربح المتوقع:</span>
+                        <span class="amount value-green" id="liveExpectedProfit">0.000 ر.ع</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    💾 حفظ البيانات والتكلفة
+                </button>
             </div>
+        </form>
+    </div>
 
+    <!-- Table Section -->
+    <div class="table-card">
+        <div class="table-header">
+            <h2>📋 سجل السيارات المضافة والتكاليف</h2>
         </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>السيارة</th>
+                        <th>السنة</th>
+                        <th>الشراء</th>
+                        <th>الشحن</th>
+                        <th>الصيانة</th>
+                        <th>أخرى</th>
+                        <th>التكلفة الكلية</th>
+                        <th>سعر البيع</th>
+                        <th>الربح</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="carTableBody">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-    </section>
+<script>
+    // Storage Array
+    let carsList = JSON.parse(localStorage.getItem('carCostList')) || [];
 
-</main>
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+        calculateLive();
+        renderTable();
+    });
 
-<footer>
-    CarCost © 2026
-</footer>
+    // Function to Calculate Live Costs and Profit
+    function calculateLive() {
+        const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
+        const shippingPrice = parseFloat(document.getElementById('shippingPrice').value) || 0;
+        const repairPrice = parseFloat(document.getElementById('repairPrice').value) || 0;
+        const otherExpenses = parseFloat(document.getElementById('otherExpenses').value) || 0;
+        const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
 
-<script src="script.js"></script>
+        const totalCost = buyPrice + shippingPrice + repairPrice + otherExpenses;
+        const profit = sellPrice - totalCost;
+
+        document.getElementById('liveTotalCost').innerText = totalCost.toFixed(3) + ' ر.ع';
+        
+        const profitEl = document.getElementById('liveExpectedProfit');
+        profitEl.innerText = (profit >= 0 ? '+ ' : '') + profit.toFixed(3) + ' ر.ع';
+        profitEl.className = 'amount ' + (profit >= 0 ? 'value-green' : 'badge-loss');
+    }
+
+    // Function to Save Car Data to LocalStorage & List
+    function saveCarData(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('carName').value.trim();
+        const year = document.getElementById('carYear').value;
+        const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
+        const shippingPrice = parseFloat(document.getElementById('shippingPrice').value) || 0;
+        const repairPrice = parseFloat(document.getElementById('repairPrice').value) || 0;
+        const otherExpenses = parseFloat(document.getElementById('otherExpenses').value) || 0;
+        const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
+
+        const totalCost = buyPrice + shippingPrice + repairPrice + otherExpenses;
+        const profit = sellPrice - totalCost;
+
+        const newCar = {
+            id: Date.now(),
+            name,
+            year,
+            buyPrice,
+            shippingPrice,
+            repairPrice,
+            otherExpenses,
+            totalCost,
+            sellPrice,
+            profit
+        };
+
+        carsList.push(newCar);
+        localStorage.setItem('carCostList', JSON.stringify(carsList));
+
+        // Reset Form
+        document.getElementById('carForm').reset();
+
+        calculateLive();
+        renderTable();
+    }
+
+    // Function to Render Table and Update KPI Summary
+    function renderTable() {
+        const tbody = document.getElementById('carTableBody');
+        tbody.innerHTML = '';
+
+        let grandCost = 0;
+        let grandSales = 0;
+        let grandProfit = 0;
+
+        if (carsList.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="empty-state">
+                        لا توجد سيارات مضافة حالياً. أدخل البيانات أعلاه واضغط على "حفظ البيانات والتكلفة".
+                    </td>
+                </tr>
+            `;
+        } else {
+            carsList.forEach((car) => {
+                grandCost += car.totalCost;
+                grandSales += car.sellPrice;
+                grandProfit += car.profit;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-bold">${car.name}</td>
+                    <td>${car.year}</td>
+                    <td>${car.buyPrice.toFixed(3)} ر.ع</td>
+                    <td>${car.shippingPrice.toFixed(3)} ر.ع</td>
+                    <td>${car.repairPrice.toFixed(3)} ر.ع</td>
+                    <td>${car.otherExpenses.toFixed(3)} ر.ع</td>
+                    <td class="text-bold value-amber">${car.totalCost.toFixed(3)} ر.ع</td>
+                    <td class="text-bold">${car.sellPrice.toFixed(3)} ر.ع</td>
+                    <td class="${car.profit >= 0 ? 'badge-profit' : 'badge-loss'}">
+                        ${car.profit >= 0 ? '+' : ''}${car.profit.toFixed(3)} ر.ع
+                    </td>
+                    <td>
+                        <button class="btn-delete" onclick="deleteCar(${car.id})">حذف</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update KPIs
+        document.getElementById('kpi-count').innerText = carsList.length;
+        document.getElementById('kpi-total-cost').innerText = grandCost.toFixed(3) + ' ر.ع';
+        document.getElementById('kpi-total-sales').innerText = grandSales.toFixed(3) + ' ر.ع';
+        
+        const kpiProfitEl = document.getElementById('kpi-total-profit');
+        kpiProfitEl.innerText = (grandProfit >= 0 ? '+ ' : '') + grandProfit.toFixed(3) + ' ر.ع';
+        kpiProfitEl.className = 'value ' + (grandProfit >= 0 ? 'value-green' : 'badge-loss');
+    }
+
+    // Function to Delete Row
+    function deleteCar(id) {
+        if (confirm('هل أنت تأكد من رغبتك في حذف هذه السيارة من السجل؟')) {
+            carsList = carsList.filter(car => car.id !== id);
+            localStorage.setItem('carCostList', JSON.stringify(carsList));
+            renderTable();
+        }
+    }
+</script>
 
 </body>
 </html>
