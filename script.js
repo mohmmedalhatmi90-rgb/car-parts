@@ -1,684 +1,161 @@
-const home = document.getElementById("home");
-const reportPage = document.getElementById("reportPage");
-const report = document.getElementById("report");
-const loading = document.getElementById("loading");
-const addCarPage = document.getElementById("addCarPage");
+// Data State
+let cars = JSON.parse(localStorage.getItem('carcost_cars')) || [];
 
+// DOM Elements
+const carForm = document.getElementById('car-form');
+const carTableBody = document.getElementById('car-table-body');
+const emptyState = document.getElementById('empty-state');
+const exportBtn = document.getElementById('export-btn');
 
-// ================================
-// التنقل بين الصفحات
-// ================================
+// Form Input Elements
+const buyPriceInput = document.getElementById('buy-price');
+const shipCostInput = document.getElementById('ship-cost');
+const repairCostInput = document.getElementById('repair-cost');
+const otherCostInput = document.getElementById('other-cost');
+const sellPriceInput = document.getElementById('sell-price');
 
-function openReport() {
+// Live Text Elements
+const liveCostText = document.getElementById('live-cost');
+const liveProfitText = document.getElementById('live-profit');
 
-    home.classList.add("hidden");
-    addCarPage.classList.add("hidden");
-    reportPage.classList.remove("hidden");
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    renderTable();
+    updateGlobalStats();
+    
+    // Attach Live Calculation Listeners
+    [buyPriceInput, shipCostInput, repairCostInput, otherCostInput, sellPriceInput].forEach(input => {
+        input.addEventListener('input', calculateLiveSummary);
+    });
+});
 
+// Live Computation Function
+function calculateLiveSummary() {
+    const buy = parseFloat(buyPriceInput.value) || 0;
+    const ship = parseFloat(shipCostInput.value) || 0;
+    const repair = parseFloat(repairCostInput.value) || 0;
+    const other = parseFloat(otherCostInput.value) || 0;
+    const sell = parseFloat(sellPriceInput.value) || 0;
+
+    const totalCost = buy + ship + repair + other;
+    const netProfit = sell - totalCost;
+
+    liveCostText.textContent = `${totalCost.toLocaleString()} ر.ع`;
+    liveProfitText.textContent = `${netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()} ر.ع`;
+    
+    liveProfitText.className = netProfit >= 0 ? 'profit-text' : 'badge-loss';
 }
 
+// Add New Car Form Submit
+carForm.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-function openAddCar() {
+    const buy = parseFloat(buyPriceInput.value) || 0;
+    const ship = parseFloat(shipCostInput.value) || 0;
+    const repair = parseFloat(repairCostInput.value) || 0;
+    const other = parseFloat(otherCostInput.value) || 0;
+    const sell = parseFloat(sellPriceInput.value) || 0;
 
-    home.classList.add("hidden");
-    reportPage.classList.add("hidden");
-    addCarPage.classList.remove("hidden");
+    const totalExpenses = ship + repair + other;
+    const totalCost = buy + totalExpenses;
+    const netProfit = sell - totalCost;
 
-    displayCars();
-
-}
-
-
-function goHome() {
-
-    reportPage.classList.add("hidden");
-    addCarPage.classList.add("hidden");
-
-    home.classList.remove("hidden");
-
-    report.classList.add("hidden");
-
-    updateStatistics();
-
-}
-
-
-// ================================
-// حساب السيارة
-// ================================
-
-function addAndCalculate() {
-
-    const name =
-        document.getElementById("carName").value.trim();
-
-    const year =
-        Number(document.getElementById("carYear").value);
-
-    const buyPrice =
-        Number(document.getElementById("buyPrice").value);
-
-    const shipping =
-        Number(document.getElementById("shipping").value);
-
-    const repair =
-        Number(document.getElementById("repair").value);
-
-    const otherCost =
-        Number(document.getElementById("otherCost").value);
-
-    const salePrice =
-        Number(document.getElementById("salePrice").value);
-
-
-    // التحقق
-
-    if (!name) {
-
-        alert("⚠️ اكتب اسم السيارة");
-
-        return;
-    }
-
-    if (!year) {
-
-        alert("⚠️ اكتب سنة السيارة");
-
-        return;
-    }
-
-    if (buyPrice <= 0) {
-
-        alert("⚠️ اكتب سعر الشراء");
-
-        return;
-    }
-
-    if (salePrice <= 0) {
-
-        alert("⚠️ اكتب سعر البيع");
-
-        return;
-    }
-
-
-    // الحساب
-
-    const totalCost =
-        buyPrice +
-        shipping +
-        repair +
-        otherCost;
-
-    const profit =
-        salePrice -
-        totalCost;
-
-
-    // إنشاء السيارة
-
-    const car = {
-
+    const newCar = {
         id: Date.now(),
-
-        name: name,
-
-        year: year,
-
-        buyPrice: buyPrice,
-
-        shipping: shipping,
-
-        repair: repair,
-
-        otherCost: otherCost,
-
+        name: document.getElementById('car-name').value,
+        year: document.getElementById('car-year').value,
+        buyPrice: buy,
+        expenses: totalExpenses,
         totalCost: totalCost,
-
-        salePrice: salePrice,
-
-        profit: profit
-
+        sellPrice: sell,
+        profit: netProfit
     };
 
+    cars.push(newCar);
+    saveData();
+    renderTable();
+    updateGlobalStats();
 
-    // جلب السيارات القديمة
+    carForm.reset();
+    calculateLiveSummary();
+});
 
-    let cars =
-        JSON.parse(
-            localStorage.getItem("carcost_cars")
-        ) || [];
-
-
-    // إضافة السيارة
-
-    cars.push(car);
-
-
-    // حفظ
-
-    localStorage.setItem(
-        "carcost_cars",
-        JSON.stringify(cars)
-    );
-
-
-    // إظهار رسالة
-
-    alert("✅ تمت إضافة السيارة بنجاح");
-
-
-    // تنظيف الحقول
-
-    document.getElementById("carName").value = "";
-    document.getElementById("carYear").value = "";
-    document.getElementById("buyPrice").value = "";
-    document.getElementById("shipping").value = "";
-    document.getElementById("repair").value = "";
-    document.getElementById("otherCost").value = "";
-    document.getElementById("salePrice").value = "";
-
-
-    // تحديث القائمة
-
-    displayCars();
-
-    updateStatistics();
-
+// Save to LocalStorage
+function saveData() {
+    localStorage.setItem('carcost_cars', JSON.stringify(cars));
 }
 
+// Update Top Dashboard Stats
+function updateGlobalStats() {
+    const totalCars = cars.length;
+    const totalCost = cars.reduce((acc, c) => acc + c.totalCost, 0);
+    const totalSales = cars.reduce((acc, c) => acc + c.sellPrice, 0);
+    const totalProfit = cars.reduce((acc, c) => acc + c.profit, 0);
 
-// ================================
-// عرض السيارات
-// ================================
+    document.getElementById('stat-count').textContent = totalCars;
+    document.getElementById('stat-cost').innerHTML = `${totalCost.toLocaleString()} <small>ر.ع</small>`;
+    document.getElementById('stat-sales').innerHTML = `${totalSales.toLocaleString()} <small>ر.ع</small>`;
+    
+    const profitStat = document.getElementById('stat-profit');
+    profitStat.innerHTML = `${totalProfit >= 0 ? '+' : ''}${totalProfit.toLocaleString()} <small>ر.ع</small>`;
+    profitStat.className = totalProfit >= 0 ? 'stat-value profit' : 'stat-value badge-loss';
+}
 
-function displayCars() {
-
-    const carsList =
-        document.getElementById("carsList");
-
-
-    let cars =
-        JSON.parse(
-            localStorage.getItem("carcost_cars")
-        ) || [];
-
+// Render Table Data
+function renderTable() {
+    carTableBody.innerHTML = '';
 
     if (cars.length === 0) {
-
-        carsList.innerHTML =
-            "لا توجد سيارات مضافة.";
-
+        emptyState.style.display = 'block';
         return;
     }
 
+    emptyState.style.display = 'none';
 
-    carsList.innerHTML =
-        cars.map(function(car, index) {
+    cars.forEach(car => {
+        const tr = document.createElement('tr');
+        const isProfit = car.profit >= 0;
 
-            return `
+        tr.innerHTML = `
+            <td><strong>${car.name}</strong></td>
+            <td>${car.year}</td>
+            <td>${car.buyPrice.toLocaleString()} ر.ع</td>
+            <td>${car.expenses.toLocaleString()} ر.ع</td>
+            <td><strong>${car.totalCost.toLocaleString()} ر.ع</strong></td>
+            <td>${car.sellPrice.toLocaleString()} ر.ع</td>
+            <td class="${isProfit ? 'badge-profit' : 'badge-loss'}">
+                ${isProfit ? '+' : ''}${car.profit.toLocaleString()} ر.ع
+            </td>
+            <td>
+                <button class="btn-delete" onclick="deleteCar(${car.id})">حذف</button>
+            </td>
+        `;
 
-                <div class="car-item">
-
-                    <h3>
-                        🚗 ${car.name}
-                    </h3>
-
-                    <div class="car-info">
-
-                        <div>
-                            السنة
-                            <strong>
-                                ${car.year}
-                            </strong>
-                        </div>
-
-                        <div>
-                            التكلفة
-                            <strong>
-                                ${formatMoney(car.totalCost)}
-                            </strong>
-                        </div>
-
-                        <div>
-                            البيع
-                            <strong>
-                                ${formatMoney(car.salePrice)}
-                            </strong>
-                        </div>
-
-                        <div>
-                            الربح
-                            <strong>
-                                ${formatMoney(car.profit)}
-                            </strong>
-                        </div>
-
-                    </div>
-
-                    <button
-                        class="delete-button"
-                        onclick="deleteCar(${car.id})">
-
-                        🗑️ حذف السيارة
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }).join("");
-
-}
-
-
-// ================================
-// حذف سيارة
-// ================================
-
-function deleteCar(id) {
-
-    let cars =
-        JSON.parse(
-            localStorage.getItem("carcost_cars")
-        ) || [];
-
-
-    cars =
-        cars.filter(function(car) {
-
-            return car.id !== id;
-
-        });
-
-
-    localStorage.setItem(
-        "carcost_cars",
-        JSON.stringify(cars)
-    );
-
-
-    displayCars();
-
-    updateStatistics();
-
-}
-
-
-// ================================
-// الإحصائيات
-// ================================
-
-function updateStatistics() {
-
-    let cars =
-        JSON.parse(
-            localStorage.getItem("carcost_cars")
-        ) || [];
-
-
-    let totalCost = 0;
-    let totalSale = 0;
-    let totalProfit = 0;
-
-
-    cars.forEach(function(car) {
-
-        totalCost += Number(car.totalCost) || 0;
-
-        totalSale += Number(car.salePrice) || 0;
-
-        totalProfit += Number(car.profit) || 0;
-
+        carTableBody.appendChild(tr);
     });
-
-
-    document.getElementById("carCount")
-        .textContent = cars.length;
-
-
-    document.getElementById("allCost")
-        .textContent = formatMoney(totalCost);
-
-
-    document.getElementById("allSale")
-        .textContent = formatMoney(totalSale);
-
-
-    document.getElementById("allProfit")
-        .textContent = formatMoney(totalProfit);
-
 }
 
-
-// ================================
-// تنسيق الريال
-// ================================
-
-function formatMoney(number) {
-
-    return Number(number).toLocaleString("ar-OM") + " ر.ع";
-
+// Delete Action
+function deleteCar(id) {
+    if (confirm('هل أنت تأكد من رغبتك في حذف هذه السيارة؟')) {
+        cars = cars.filter(c => c.id !== id);
+        saveData();
+        renderTable();
+        updateGlobalStats();
+    }
 }
 
-
-// ================================
-// البحث بالـ VIN
-// ================================
-
-async function searchVIN() {
-
-    const input =
-        document.getElementById("vin");
-
-    const vin =
-        input.value
-            .trim()
-            .toUpperCase();
-
-
-    if (vin.length !== 17) {
-
-        alert(
-            "رقم VIN يجب أن يكون 17 خانة."
-        );
-
+// Export Data to JSON File
+exportBtn.addEventListener('click', () => {
+    if (cars.length === 0) {
+        alert('لا توجد بيانات لتصديرها');
         return;
     }
-
-
-    loading.classList.remove("hidden");
-
-    report.classList.add("hidden");
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/vin",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        vin: vin
-                    })
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.error ||
-                "فشل البحث"
-            );
-
-        }
-
-
-        if (!data.data) {
-
-            throw new Error(
-                "لم يتم العثور على بيانات السيارة."
-            );
-
-        }
-
-
-        displayReport(
-            data.data,
-            vin
-        );
-
-
-    } catch (error) {
-
-        alert(
-            "❌ " +
-            error.message
-        );
-
-
-    } finally {
-
-        loading.classList.add("hidden");
-
-    }
-
-}
-
-
-// ================================
-// عرض تقرير VIN
-// ================================
-
-function displayReport(car, vin) {
-
-    document.getElementById("vinResult")
-        .textContent = vin;
-
-
-    document.getElementById("make")
-        .textContent =
-            car.make || "غير متوفر";
-
-
-    document.getElementById("model")
-        .textContent =
-            car.model || "غير متوفر";
-
-
-    document.getElementById("year")
-        .textContent =
-            car.year || "غير متوفر";
-
-
-    const history =
-        car.history || [];
-
-
-    const accidents =
-        document.getElementById("accidents");
-
-
-    if (history.length === 0) {
-
-        accidents.innerHTML =
-            "⚪ لا توجد سجلات مزاد متاحة.";
-
-    } else {
-
-        accidents.innerHTML =
-            history.map(function(item) {
-
-                return `
-
-                    <div class="history-item">
-
-                        🏁
-                        ${item.auction || "Copart"}
-
-                        <br>
-
-                        📅
-                        ${item.sale_date || "-"}
-
-                        <br>
-
-                        💥 الضرر:
-                        ${item.primary_damage || "-"}
-
-                        <br>
-
-                        💥 الضرر الثانوي:
-                        ${item.secondary_damage || "-"}
-
-                        <br>
-
-                        📏 الممشى:
-                        ${item.odometer || "-"}
-
-                        <br>
-
-                        🏷️ Title:
-                        ${item.title_type || "-"}
-
-                        <br>
-
-                        💰 السعر:
-                        ${item.final_bid || "-"}
-
-                    </div>
-
-                `;
-
-            }).join("");
-
-    }
-
-
-    const mileage =
-        document.getElementById("mileage");
-
-
-    const mileageData =
-        history.filter(function(item) {
-
-            return item.odometer;
-
-        });
-
-
-    if (mileageData.length) {
-
-        mileage.innerHTML =
-            mileageData.map(function(item) {
-
-                return `
-
-                    <div class="history-item">
-
-                        📅
-                        ${item.sale_date || "-"}
-
-                        <br>
-
-                        📏
-                        ${item.odometer}
-
-                    </div>
-
-                `;
-
-            }).join("");
-
-    } else {
-
-        mileage.innerHTML =
-            "⚪ لا توجد بيانات ممشى.";
-
-    }
-
-
-    const latest =
-        history[history.length - 1];
-
-
-    document.getElementById("titleStatus")
-        .textContent =
-            latest?.title_type ||
-            "غير متوفر";
-
-
-    const photos =
-        document.getElementById("photos");
-
-
-    const images =
-        history.flatMap(function(item) {
-
-            return item.photos || [];
-
-        });
-
-
-    if (images.length) {
-
-        photos.innerHTML =
-            images
-                .slice(0, 12)
-                .map(function(image) {
-
-                    return `
-
-                        <img
-                            src="${image}"
-                            class="car-image"
-                        >
-
-                    `;
-
-                })
-                .join("");
-
-    } else {
-
-        photos.innerHTML =
-            "📸 لا توجد صور متاحة.";
-
-    }
-
-
-    document.getElementById("omanPrice")
-        .textContent =
-            "بانتظار بيانات السوق";
-
-
-    document.getElementById("sellingPrice")
-        .textContent =
-            "بانتظار بيانات السوق";
-
-
-    document.getElementById("totalCost")
-        .textContent =
-            "يُحسب بعد إدخال التكاليف";
-
-
-    document.getElementById("expectedSale")
-        .textContent =
-            "يُحدد من السوق";
-
-
-    document.getElementById("profit")
-        .textContent =
-            "يُحسب تلقائيًا";
-
-
-    document.getElementById("dealScore")
-        .textContent =
-            "🧠 تقييم الصفقة: سيتم حسابه";
-
-
-    report.classList.remove("hidden");
-
-}
-
-
-// ================================
-// تشغيل الإحصائيات عند فتح الموقع
-// ================================
-
-updateStatistics();
-
-displayCars();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cars, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `carcost_backup_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+});
